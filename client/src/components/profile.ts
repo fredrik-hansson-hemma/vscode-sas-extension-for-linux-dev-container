@@ -19,6 +19,7 @@ export const EXTENSION_ACTIVE_PROFILE_CONFIG_KEY = "activeProfile";
 enum ConnectionOptions {
   SAS9COM = "SAS 9.4 (local)",
   SAS9IOM = "SAS 9.4 (remote - IOM)",
+  SAS9IOMJava = "SAS 9.4 (remote - IOM/Java, Linux)",
   SAS9SSH = "SAS 9.4 (remote - SSH)",
   SASViya = "SAS Viya",
 }
@@ -27,6 +28,7 @@ const CONNECTION_PICK_OPTS: string[] = [
   ConnectionOptions.SASViya,
   ConnectionOptions.SAS9SSH,
   ConnectionOptions.SAS9IOM,
+  ConnectionOptions.SAS9IOMJava,
   ConnectionOptions.SAS9COM,
 ];
 
@@ -58,6 +60,7 @@ export enum AuthType {
 export enum ConnectionType {
   COM = "com",
   IOM = "iom",
+  IOMJava = "iom-java",
   Rest = "rest",
   SSH = "ssh",
 }
@@ -103,7 +106,21 @@ export interface IOMProfile extends BaseProfile, ProfileWithFileRootOptions {
   port: number;
 }
 
-export type Profile = ViyaProfile | SSHProfile | COMProfile | IOMProfile;
+export interface IOMJavaProfile extends BaseProfile {
+  connectionType: ConnectionType.IOMJava;
+  host: string;
+  port: number;
+  username: string;
+  sasJarPath: string;
+  javaPath?: string;
+}
+
+export type Profile =
+  | ViyaProfile
+  | SSHProfile
+  | COMProfile
+  | IOMProfile
+  | IOMJavaProfile;
 
 export enum AutoExecType {
   File = "file",
@@ -455,6 +472,23 @@ export class ProfileConfig {
         pv.error = l10n.t("Missing endpoint in active profile.");
         return pv;
       }
+    } else if (profile.connectionType === ConnectionType.IOMJava) {
+      if (!profile.host) {
+        pv.error = l10n.t("Missing host in active profile.");
+        return pv;
+      }
+      if (!profile.port) {
+        pv.error = l10n.t("Missing port in active profile.");
+        return pv;
+      }
+      if (!profile.username) {
+        pv.error = l10n.t("Missing username in active profile.");
+        return pv;
+      }
+      if (!profile.sasJarPath) {
+        pv.error = l10n.t("Missing sasJarPath in active profile.");
+        return pv;
+      }
     } else if (profile.connectionType === ConnectionType.SSH) {
       if (!profile.host) {
         pv.error = l10n.t("Missing host in active profile.");
@@ -600,7 +634,10 @@ export class ProfileConfig {
       profileClone.sasOptions = [];
       profileClone.host = "localhost"; //once remote support rolls out this should be set via prompting
       await this.upsertProfile(name, profileClone);
-    } else if (profileClone.connectionType === ConnectionType.IOM) {
+    } else if (
+      profileClone.connectionType === ConnectionType.IOM ||
+      profileClone.connectionType === ConnectionType.IOMJava
+    ) {
       profileClone.sasOptions = [];
       profileClone.host = await createInputTextBox(
         ProfilePromptType.Host,
@@ -625,6 +662,16 @@ export class ProfileConfig {
         return;
       }
 
+      if (profileClone.connectionType === ConnectionType.IOMJava) {
+        profileClone.sasJarPath = await createInputTextBox(
+          ProfilePromptType.SasJarPath,
+          profileClone.sasJarPath,
+        );
+        if (!profileClone.sasJarPath) {
+          return;
+        }
+      }
+
       await this.upsertProfile(name, profileClone);
     }
   }
@@ -641,6 +688,7 @@ export class ProfileConfig {
       case ConnectionType.SSH:
       case ConnectionType.COM:
       case ConnectionType.IOM:
+      case ConnectionType.IOMJava:
         return activeProfile.host;
       case ConnectionType.Rest:
         return activeProfile.endpoint;
@@ -673,6 +721,7 @@ export enum ProfilePromptType {
   Port,
   Username,
   PrivateKeyFilePath,
+  SasJarPath,
 }
 
 /**
@@ -815,6 +864,13 @@ const input: ProfilePromptInput = {
     placeholder: l10n.t("Enter the local private key file path"),
     description: l10n.t("To use the SSH Agent or a password, leave blank."),
   },
+  [ProfilePromptType.SasJarPath]: {
+    title: l10n.t("SAS Integration Technologies JAR path"),
+    placeholder: l10n.t("Enter the local path to the SAS JAR files"),
+    description: l10n.t(
+      "Enter the path to a directory containing the SAS Integration Technologies Java client JARs (sas.core.jar, sas.svc.connection.jar, etc.).",
+    ),
+  },
 };
 
 /**
@@ -837,6 +893,8 @@ function mapQuickPickToEnum(connectionTypePickInput: string): ConnectionType {
       return ConnectionType.COM;
     case ConnectionOptions.SAS9IOM:
       return ConnectionType.IOM;
+    case ConnectionOptions.SAS9IOMJava:
+      return ConnectionType.IOMJava;
     default:
       return undefined;
   }

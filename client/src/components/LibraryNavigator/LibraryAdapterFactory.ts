@@ -1,5 +1,6 @@
 // Copyright © 2024, SAS Institute Inc., Cary, NC, USA.  All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
+import { IomJavaLibraryAdapter } from "../../connection/iom_java/IomJavaLibraryAdapter";
 import ItcLibraryAdapter from "../../connection/itc/ItcLibraryAdapter";
 import RestLibraryAdapter from "../../connection/rest/RestLibraryAdapter";
 import { ConnectionType } from "../profile";
@@ -11,6 +12,8 @@ class LibraryAdapterFactory {
       case ConnectionType.IOM:
       case ConnectionType.COM:
         return new ItcLibraryAdapter();
+      case ConnectionType.IOMJava:
+        return new IomJavaLibraryAdapter();
       case ConnectionType.Rest:
       default:
         return new RestLibraryAdapter();
