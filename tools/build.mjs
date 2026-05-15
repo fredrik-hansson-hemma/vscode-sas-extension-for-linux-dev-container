@@ -124,6 +124,11 @@ const copyFiles = (filter = null) => {
       src: "./client/src/connection/itc/script",
       dest: "./client/dist/node",
     },
+    {
+      // Prebuilt IOM Java bridge (see iom-java-bridge/ and DEVELOPMENT.md)
+      src: "./client/src/connection/iom_java/iom-java-bridge.jar",
+      dest: "./client/dist/node/iom-java-bridge.jar",
+    },
   ];
   const filteredFoldersToCopy =
     filter === null
@@ -141,6 +146,7 @@ const copyFiles = (filter = null) => {
   );
 
   copyKatexCss();
+
   console.log("Files copied");
 };
 
