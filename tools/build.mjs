@@ -141,6 +141,13 @@ const copyFiles = (filter = null) => {
   );
 
   copyKatexCss();
+
+  // Copy the pre-built IOM Java bridge JAR to the node distribution directory
+  const bridgeJar = "./client/src/connection/iom_java/iom-java-bridge.jar";
+  if (fs.existsSync(bridgeJar)) {
+    fs.copyFileSync(bridgeJar, "./client/dist/node/iom-java-bridge.jar");
+  }
+
   console.log("Files copied");
 };
 

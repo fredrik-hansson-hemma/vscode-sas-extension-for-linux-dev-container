@@ -15,7 +15,7 @@ import { Session } from "../session";
 import { BridgeRequest, BridgeResponse, Config } from "./types";
 
 const SECRET_STORAGE_NAMESPACE = "IOM_JAVA_SECRET_STORAGE";
-const BRIDGE_JAR = resolve(__dirname, "..", "..", "..", "..", "iom-java-bridge", "target", "iom-java-bridge.jar");
+const BRIDGE_JAR = resolve(__dirname, "iom-java-bridge.jar");
 
 let sessionInstance: IomJavaSession | undefined;
 
@@ -118,7 +118,7 @@ export class IomJavaSession extends Session {
 
     if (this._html5FileName) {
       const listOutput = await this.send({ cmd: "flushList" });
-      const listData = (listOutput.data as string) || "";
+      const listData = typeof listOutput.data === "string" ? listOutput.data : "";
       if (listData.search('<*id="IDX*.+">') !== -1) {
         runResult.html5 = listData;
         runResult.title = l10n.t("Result");
@@ -181,7 +181,7 @@ export class IomJavaSession extends Session {
 
   private async collectLog(): Promise<string> {
     const response = await this.send({ cmd: "flushLog" });
-    return (response.data as string) || "";
+    return typeof response.data === "string" ? response.data : "";
   }
 
   // -------------------------------------------------------------------------

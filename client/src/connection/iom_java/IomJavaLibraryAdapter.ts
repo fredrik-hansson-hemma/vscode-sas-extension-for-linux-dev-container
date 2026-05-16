@@ -1,7 +1,5 @@
 // Copyright © 2024, SAS Institute Inc., Cary, NC, USA.  All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-import { l10n } from "vscode";
-
 import type { SortModelItem } from "ag-grid-community";
 
 import { onRunError } from "../../commands/run";
@@ -15,6 +13,10 @@ import {
 import { ColumnCollection, TableInfo } from "../rest/api/compute";
 import { getColumnIconType } from "../util";
 import { bridgeSend } from "./index";
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
 
 export class IomJavaLibraryAdapter implements LibraryAdapter {
   public async connect(): Promise<void> {
@@ -34,23 +36,25 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
     await bridgeSend({ cmd: "flushLog" });
   }
 
-  public async getLibraries(
-    _start: number,
-    _limit: number,
-  ): Promise<{ items: LibraryItem[]; count: number }> {
+  public async getLibraries(): Promise<{ items: LibraryItem[]; count: number }> {
     try {
       const resp = await bridgeSend({ cmd: "getLibraries" });
       if (resp.status === "error") {
         throw new Error(resp.message);
       }
-      const raw = (resp.data as Array<{ id: string; name: string; readOnly: boolean }>) || [];
-      const items: LibraryItem[] = raw.map((lib) => ({
-        type: "library" as const,
-        uid: lib.name,
-        id: lib.name,
-        name: lib.name,
-        readOnly: !!lib.readOnly,
-      }));
+      const raw = Array.isArray(resp.data) ? resp.data : [];
+      const items: LibraryItem[] = raw.reduce<LibraryItem[]>((acc, entry) => {
+        if (isRecord(entry) && typeof entry.name === "string") {
+          acc.push({
+            type: "library" as const,
+            uid: entry.name,
+            id: entry.name,
+            name: entry.name,
+            readOnly: !!entry.readOnly,
+          });
+        }
+        return acc;
+      }, []);
       return { items, count: -1 };
     } catch (e) {
       onRunError(e);
@@ -60,8 +64,6 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
 
   public async getTables(
     item: LibraryItem,
-    _start: number,
-    _limit: number,
   ): Promise<{ items: LibraryItem[]; count: number }> {
     try {
       const resp = await bridgeSend({
@@ -71,15 +73,20 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
       if (resp.status === "error") {
         throw new Error(resp.message);
       }
-      const raw = (resp.data as string[]) || [];
-      const items: LibraryItem[] = raw.map((tbl) => ({
-        type: "table" as const,
-        uid: `${item.name}.${tbl}`,
-        id: tbl,
-        name: tbl,
-        library: item.name,
-        readOnly: item.readOnly,
-      }));
+      const raw = Array.isArray(resp.data) ? resp.data : [];
+      const items: LibraryItem[] = raw.reduce<LibraryItem[]>((acc, tbl) => {
+        if (typeof tbl === "string") {
+          acc.push({
+            type: "table" as const,
+            uid: `${item.name}.${tbl}`,
+            id: tbl,
+            name: tbl,
+            library: item.name,
+            readOnly: item.readOnly,
+          });
+        }
+        return acc;
+      }, []);
       return { items, count: -1 };
     } catch (e) {
       onRunError(e);
@@ -87,11 +94,7 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
     }
   }
 
-  public async getColumns(
-    item: LibraryItem,
-    _start: number,
-    _limit: number,
-  ): Promise<ColumnCollection> {
+  public async getColumns(item: LibraryItem): Promise<ColumnCollection> {
     try {
       const resp = await bridgeSend({
         cmd: "getColumns",
@@ -101,25 +104,40 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
       if (resp.status === "error") {
         throw new Error(resp.message);
       }
-      const raw =
-        (resp.data as Array<{
-          index: number;
-          name: string;
-          type: string;
-          length: number;
-          label: string;
-          format: string;
-          informat: string;
-        }>) || [];
-      const items = raw.map((col, idx) => ({
-        index: idx,
-        name: col.name,
-        type: getColumnIconType({ index: idx, type: col.type, name: col.name, format: col.format || "" }),
-        label: col.label,
-        length: col.length,
-        format: col.format ? { name: col.format, width: 0, precision: 0 } : undefined,
-        informat: col.informat ? { name: col.informat, width: 0, precision: 0 } : undefined,
-      }));
+      const raw = Array.isArray(resp.data) ? resp.data : [];
+      let colIdx = 0;
+      const items = raw.reduce<NonNullable<ColumnCollection["items"]>>(
+        (acc, col) => {
+          if (
+            isRecord(col) &&
+            typeof col.name === "string" &&
+            typeof col.type === "string"
+          ) {
+            const idx = colIdx++;
+            const fmt = typeof col.format === "string" ? col.format : "";
+            acc.push({
+              index: idx,
+              name: col.name,
+              type: getColumnIconType({
+                index: idx,
+                type: col.type,
+                name: col.name,
+                format: fmt,
+              }),
+              label: typeof col.label === "string" ? col.label : undefined,
+              length:
+                typeof col.length === "number" ? col.length : undefined,
+              format: fmt ? { name: fmt } : undefined,
+              informat:
+                typeof col.informat === "string" && col.informat
+                  ? { name: col.informat }
+                  : undefined,
+            });
+          }
+          return acc;
+        },
+        [],
+      );
       return { items, count: -1 };
     } catch (e) {
       onRunError(e);
@@ -151,7 +169,8 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
         throw new Error(submitResp.message);
       }
       const logResp = await bridgeSend({ cmd: "flushLog" });
-      const log = (logResp.data as string) || "";
+      const log =
+        typeof logResp.data === "string" ? logResp.data : "";
       const rows = this.parseProcsqlRows(log, start);
       return { rows, count: -1 };
     } catch (e) {
@@ -167,7 +186,7 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
   ): Promise<TableData> {
     const columns =
       start === 0
-        ? { columns: (await this.getColumns(item, 0, 999)).items.map((c) => c.name || "") }
+        ? { columns: (await this.getColumns(item)).items.map((c) => c.name || "") }
         : {};
     const { rows } = await this.getRows(item, start, limit, [], undefined);
     rows.unshift(columns);
@@ -187,7 +206,8 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
       throw new Error(submitResp.message);
     }
     const logResp = await bridgeSend({ cmd: "flushLog" });
-    const log = (logResp.data as string) || "";
+    const log =
+      typeof logResp.data === "string" ? logResp.data : "";
     const match = log.match(/IOMJAVA_COUNT=\s*(\d+)/);
     const rowCount = match ? parseInt(match[1], 10) : 0;
     return { rowCount, maxNumberOfRowsToRead: 100 };
@@ -223,7 +243,8 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
         return base;
       }
       const logResp = await bridgeSend({ cmd: "flushLog" });
-      const log = (logResp.data as string) || "";
+      const log =
+        typeof logResp.data === "string" ? logResp.data : "";
       const match = log.match(/IOMJAVA_TBLINFO:\s*(\d+)\s+(\d+)\s+(\d+)\s*(.*)/);
       if (match) {
         return {
@@ -245,19 +266,21 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
   // -------------------------------------------------------------------------
 
   private buildWhereClause(filterValue: string): string {
-    // Very conservative escaping: only allow alphanumeric + spaces in filter
     const safe = filterValue.replace(/['"]/g, "");
     return `(1=1 /* filter: ${safe} */)`;
   }
 
   private parseProcsqlRows(log: string, start: number): TableRow[] {
-    // Parse tab- or space-separated lines from PROC SQL output
-    // This is a best-effort parser; the primary use is library browsing
     const rows: TableRow[] = [];
     let rowIdx = start;
     for (const raw of log.split("\n")) {
       const line = raw.trimEnd();
-      if (!line || line.startsWith("NOTE:") || line.startsWith("WARNING:") || line.startsWith("ERROR:")) {
+      if (
+        !line ||
+        line.startsWith("NOTE:") ||
+        line.startsWith("WARNING:") ||
+        line.startsWith("ERROR:")
+      ) {
         continue;
       }
       const cells = line.split(/\t/).map((c) => c.trim());
@@ -268,23 +291,4 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
     }
     return rows;
   }
-
-  private _warnedNotImpl = false;
-  private warnNotImpl(method: string): void {
-    if (!this._warnedNotImpl) {
-      console.warn(`[iom-java] ${method} not fully implemented`);
-      this._warnedNotImpl = true;
-    }
-  }
-}
-
-/**
- * Returns a table-data result with an error row when something fails at
- * the adapter level and we still want to surface a message in the UI.
- */
-function errorTableData(msg: string): TableData {
-  return {
-    rows: [{ cells: [l10n.t("Error: {0}", msg)] }],
-    count: 0,
-  };
 }
