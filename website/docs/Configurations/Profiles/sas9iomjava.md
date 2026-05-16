@@ -14,9 +14,24 @@ You can use the console log to help debug connection issues. For more informatio
 
 ## Prerequisites
 
+### SAS Server Requirements
+
+The SAS 9.4 server must have a **Workspace Server** configured and running, managed by the SAS Object Spawner service. This is the standard configuration for remote SAS 9.4 access and requires no special setup beyond what is already in place for other IOM-based clients such as SAS Enterprise Guide.
+
+This connection type connects **directly** to the Workspace Server using its host name and port. A SAS Metadata Server is **not** required.
+
+TCP port 8591 (or the port configured for your Workspace Server) must be reachable from the machine where VS Code is running. You can verify network connectivity from a terminal before configuring the extension:
+
+```sh
+# Check that the port is reachable
+nc -z sas-server.example.com 8591 && echo "Port open" || echo "Port closed"
+```
+
+If the port is not reachable, contact your SAS administrator to confirm the Workspace Server is running and that any firewall between your machine and the server allows outbound TCP connections on that port.
+
 ### Java Runtime
 
-Java 8 is recommended. The extension spawns a small Java process to manage the IOM connection, so a Java executable must be available on the machine where VS Code is running.
+The extension spawns a small Java process to manage the IOM connection, so a Java executable must be available on the machine where VS Code is running. Java 8 is recommended.
 
 | Java version | Support |
 | ------------ | ------- |
@@ -41,10 +56,11 @@ The following JAR files are required:
 - `sas.entities.jar`
 - `sas.rutil.jar`
 
-You can copy these files from your SAS installation (typically located under `$SASHOME/SASVersionedJarRepository/eclipse/plugins/`) to a local directory:
+These files are typically located under `$SASHOME/SASVersionedJarRepository/eclipse/plugins/` on your SAS server. The filenames include a version suffix, for example `sas.core_9.4.jar`. The extension loads all JAR files found in the `sasJarPath` directory, so copying the files as-is is sufficient.
+
+You can copy these files from your SAS server to a local directory:
 
 ```sh
-# Example: copy from a remote SAS server
 SAS_SERVER=sas-server.example.com
 SASHOME=/opt/sas/SASHome
 LOCAL_JAR_DIR=$HOME/sas-jars
@@ -56,14 +72,37 @@ for JAR in sas.core sas.svc.connection sas.entities sas.rutil; do
 done
 ```
 
+If you are not sure of the `SASHOME` path on your server, ask your SAS administrator or run `ls /opt/sas /usr/local/SASHome 2>/dev/null` on the server.
+
 #### Java 11 and later
 
-Java 11 removed the CORBA module that the SAS IOM Java client depends on. To use this connection type with Java 11 or later, place the [GlassFish ORB](https://github.com/eclipse-ee4j/orb) JARs in the same directory as the SAS JARs. The extension detects them automatically.
+Java 11 removed the CORBA module that the SAS IOM Java client depends on. To use this connection type with Java 11 or later, place the [GlassFish ORB](https://github.com/eclipse-ee4j/orb) JARs in the same directory as the SAS JARs. The extension detects them automatically by looking for the `com.sun.corba.ee.impl.orb.ORBImpl` class.
 
-Download the following JARs from Maven Central and add them to your `sasJarPath` directory:
+The required JARs are published on Maven Central under the group `com.sun.corba.ee`. Download them and place them in your `sasJarPath` directory:
 
-- `glassfish-corba-orb-*.jar`
-- `glassfish-corba-omgapi-*.jar`
+| Maven artifact | Description |
+| -------------- | ----------- |
+| `com.sun.corba.ee:glassfish-corba-orb` | ORB implementation (`ORBImpl`) |
+| `com.sun.corba.ee:glassfish-corba-omgapi` | CORBA API interfaces |
+
+You can download both JARs using Maven:
+
+```sh
+mvn dependency:copy \
+  -Dartifact=com.sun.corba.ee:glassfish-corba-orb:4.2.4 \
+  -DoutputDirectory=$LOCAL_JAR_DIR
+mvn dependency:copy \
+  -Dartifact=com.sun.corba.ee:glassfish-corba-omgapi:4.2.4 \
+  -DoutputDirectory=$LOCAL_JAR_DIR
+```
+
+Or download them manually from [Maven Central](https://search.maven.org/search?q=g:com.sun.corba.ee) and place them in your `sasJarPath` directory alongside the SAS JARs.
+
+:::note
+
+Newer SAS 9.4 maintenance releases (M6 and later) may include GlassFish ORB JARs in the `SASVersionedJarRepository`. Check whether files matching `glassfish-corba-*.jar` already exist under `$SASHOME/SASVersionedJarRepository/` before downloading separately.
+
+:::
 
 ## Profile Anatomy
 
