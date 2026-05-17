@@ -1,0 +1,36 @@
+{
+  "name": "SAS Development Environment",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "11",
+      "installMaven": "false",
+      "installGradle": "false"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "SAS.sas-lsp"
+      ],
+      "settings": {
+        "SAS.connectionProfiles": {
+          "activeProfile": "my-sas-server",
+          "profiles": {
+            "my-sas-server": {
+              "connectionType": "iom-java",
+              "host": "your-sas-server.example.com",
+              "port": 8591,
+              "username": "your-username",
+              "sasJarPath": "/opt/sas-jars"
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "postCreateCommand": "bash .devcontainer/postCreate.sh"
+}

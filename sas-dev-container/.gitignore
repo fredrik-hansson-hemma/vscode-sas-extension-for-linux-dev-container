@@ -1,0 +1,4 @@
+# SAS Integration Technologies JARs and GlassFish ORB JARs
+# These are proprietary or downloaded at container-build time.
+# Populate sas-jars/ by running: bash scripts/copy-sas-jars.sh
+sas-jars/*.jar
