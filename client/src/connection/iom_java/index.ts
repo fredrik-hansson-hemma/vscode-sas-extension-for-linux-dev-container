@@ -14,6 +14,7 @@ import { BridgeRequest, BridgeResponse, Config } from "./types";
 
 const SECRET_STORAGE_NAMESPACE = "IOM_JAVA_SECRET_STORAGE";
 const BRIDGE_JAR = resolve(__dirname, "iom-java-bridge.jar");
+const REQUEST_TIMEOUT_MS = 5 * 60 * 1000;
 
 let sessionInstance: IomJavaSession | undefined;
 
@@ -30,6 +31,7 @@ export class IomJavaSession extends Session {
   private _process: ChildProcessWithoutNullStreams | undefined;
   private _pendingResolve: ((r: BridgeResponse) => void) | undefined;
   private _pendingReject: ((e: Error) => void) | undefined;
+  private _pendingTimer: NodeJS.Timeout | undefined;
   private _connected = false;
   private _html5FileName = "";
   private _secretStorage;
@@ -72,6 +74,11 @@ export class IomJavaSession extends Session {
     });
 
     this._process.on("exit", () => {
+      const pendingReject = this._pendingReject;
+      this.clearPending();
+      pendingReject?.(
+        new Error(l10n.t("Java bridge process exited unexpectedly.")),
+      );
       this._connected = false;
       this._process = undefined;
       sessionInstance = undefined;
@@ -156,8 +163,31 @@ export class IomJavaSession extends Session {
         reject(new Error(l10n.t("Java bridge process is not running.")));
         return;
       }
+      if (this._pendingResolve) {
+        reject(
+          new Error(
+            l10n.t(
+              "A previous bridge request is still pending; concurrent requests are not supported.",
+            ),
+          ),
+        );
+        return;
+      }
       this._pendingResolve = resolve;
       this._pendingReject = reject;
+      this._pendingTimer = setTimeout(() => {
+        const pendingReject = this._pendingReject;
+        this.clearPending();
+        pendingReject?.(
+          new Error(
+            l10n.t(
+              "Bridge request '{0}' timed out after {1} seconds.",
+              req.cmd,
+              Math.round(REQUEST_TIMEOUT_MS / 1000),
+            ),
+          ),
+        );
+      }, REQUEST_TIMEOUT_MS);
       this._process.stdin.write(JSON.stringify(req) + "\n");
     });
   }
@@ -166,15 +196,24 @@ export class IomJavaSession extends Session {
     if (!line.trim()) {
       return;
     }
+    const pendingResolve = this._pendingResolve;
+    const pendingReject = this._pendingReject;
+    this.clearPending();
     try {
       const response: BridgeResponse = JSON.parse(line);
-      this._pendingResolve?.(response);
+      pendingResolve?.(response);
     } catch {
-      this._pendingReject?.(new Error(`Unexpected bridge output: ${line}`));
-    } finally {
-      this._pendingResolve = undefined;
-      this._pendingReject = undefined;
+      pendingReject?.(new Error(`Unexpected bridge output: ${line}`));
     }
+  }
+
+  private clearPending(): void {
+    if (this._pendingTimer) {
+      clearTimeout(this._pendingTimer);
+      this._pendingTimer = undefined;
+    }
+    this._pendingResolve = undefined;
+    this._pendingReject = undefined;
   }
 
   private async collectLog(): Promise<string> {

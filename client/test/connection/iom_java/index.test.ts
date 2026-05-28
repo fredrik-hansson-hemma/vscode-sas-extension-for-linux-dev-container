@@ -191,6 +191,43 @@ describe("iom-java connection", () => {
     });
   });
 
+  describe("bridge send", () => {
+    beforeEach(async () => {
+      const setupPromise = session.setup();
+      emitBridgeResponse(stdoutEmitter, { status: "ok" });
+      await setupPromise;
+    });
+
+    afterEach(async () => {
+      // Allow the in-flight run to settle before closing.
+      emitBridgeResponse(stdoutEmitter, { status: "ok", data: "" });
+      await session.close();
+    });
+
+    it("rejects a second concurrent request while one is pending", async () => {
+      // Start a run — submit acknowledgement is intentionally NOT emitted
+      // here so the bridge is left waiting for a response.
+      const firstRun = session.run("data _null_; run;");
+
+      let caughtError: Error | undefined;
+      try {
+        await session.run("data _null_; run;");
+      } catch (err) {
+        if (err instanceof Error) {
+          caughtError = err;
+        }
+      }
+
+      expect(caughtError).to.not.be.undefined;
+      expect(caughtError.message).to.include("pending");
+
+      // Unblock the first run so afterEach can close cleanly.
+      emitBridgeResponse(stdoutEmitter, { status: "ok" });
+      emitBridgeResponse(stdoutEmitter, { status: "ok", data: "" });
+      await firstRun;
+    });
+  });
+
   describe("close", () => {
     beforeEach(async () => {
       const setupPromise = session.setup();
