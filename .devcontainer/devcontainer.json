@@ -8,7 +8,7 @@
       "installGradle": "false"
     }
   },
-  "postCreateCommand": "npm install && npm install -g @vscode/vsce",
+  "postCreateCommand": "npm install && npm install -g @vscode/vsce && mvn -f iom-java-bridge/pom.xml -DskipTests -q package && cp iom-java-bridge/target/iom-java-bridge.jar client/src/connection/iom_java/",
   "customizations": {
     "vscode": {
       "extensions": [

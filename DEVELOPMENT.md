@@ -27,6 +27,9 @@ SAS 9.4 Workspace Server (TCP port 8591)
 
 Open the repository in VS Code and select **Reopen in Container**. The
 devcontainer installs Node.js LTS, JDK 11, Maven, and `vsce` automatically.
+On creation it also builds `iom-java-bridge.jar` and copies it into
+`client/src/connection/iom_java/`, so no manual Maven step is needed before
+running the extension.
 
 > **Note on Java runtime**: JDK 11 is used to _compile_ the bridge JAR. The
 > JAR targets Java 8 bytecode (`--release 8`). At runtime you need Java 8 on
@@ -66,9 +69,11 @@ The resulting `.vsix` file can be installed in VS Code via
 ## SAS JAR files
 
 The bridge loads SAS Integration Technologies JARs at runtime from the
-`sasJarPath` directory you configure. Copy these from your SAS 9.4 installation
-(typically under `$SASHOME/SASVersionedJarRepository/eclipse/plugins/`) to a
-local directory accessible from the VS Code host:
+`sasJarPath` directory you configure. The repository includes a `sas-jars/`
+folder (gitignored except for its README) which is a convenient default
+location. Copy these from your SAS 9.4 installation (typically under
+`$SASHOME/SASVersionedJarRepository/eclipse/plugins/`) to that directory or
+another local path accessible from the VS Code host:
 
 ```bash
 # Example: copy from a remote server
@@ -84,6 +89,15 @@ Minimum required JARs:
 - `sas.svc.connection.jar`
 - `sas.entities.jar`
 - `sas.rutil.jar`
+
+For Java 11+, fetch the GlassFish ORB JARs into the same directory:
+
+```bash
+./tools/fetch-orb.sh           # defaults to ./sas-jars
+./tools/fetch-orb.sh /custom   # or a different directory
+```
+
+VS Code users can run **Tasks: Run Task → Fetch GlassFish ORB**.
 
 ## Connection profile
 

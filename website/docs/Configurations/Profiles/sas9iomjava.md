@@ -85,7 +85,15 @@ The required JARs are published on Maven Central under the group `com.sun.corba.
 | `com.sun.corba.ee:glassfish-corba-orb`    | ORB implementation (`ORBImpl`) |
 | `com.sun.corba.ee:glassfish-corba-omgapi` | CORBA API interfaces           |
 
-You can download both JARs using Maven:
+If you cloned this repository, the easiest way is the helper script:
+
+```sh
+./tools/fetch-orb.sh [target-directory]   # defaults to ./sas-jars
+```
+
+VS Code users can run it from **Tasks: Run Task → Fetch GlassFish ORB**.
+
+Without the helper script, you can still download both JARs directly with Maven:
 
 ```sh
 mvn dependency:copy \
