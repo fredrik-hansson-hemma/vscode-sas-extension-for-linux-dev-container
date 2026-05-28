@@ -32,7 +32,6 @@ export class IomJavaSession extends Session {
   private _pendingReject: ((e: Error) => void) | undefined;
   private _connected = false;
   private _html5FileName = "";
-  private _password = "";
   private _secretStorage;
   private _passwordKey = "";
   private _passwordCancellation: CancellationTokenSource | undefined;
@@ -190,7 +189,6 @@ export class IomJavaSession extends Session {
   private async fetchPassword(): Promise<string | undefined> {
     const stored = await this._secretStorage.get(this._passwordKey);
     if (stored) {
-      this._password = stored;
       return stored;
     }
 
@@ -206,7 +204,6 @@ export class IomJavaSession extends Session {
       source.token,
     );
     this._passwordCancellation = undefined;
-    this._password = entered || "";
     return entered; // undefined = cancelled
   }
 
@@ -216,7 +213,6 @@ export class IomJavaSession extends Session {
 
   private async clearPassword(): Promise<void> {
     await this._secretStorage.store(this._passwordKey, "");
-    this._password = "";
   }
 
   // -------------------------------------------------------------------------
