@@ -152,17 +152,19 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
     start: number,
     limit: number,
     sortModel: SortModelItem[],
+    // `query` is intentionally ignored: the interface wires filter UI
+    // through here, but iom-java has no safe way to translate the filter
+    // to a SAS WHERE clause today, so any incoming filter would be silently
+    // dropped. Documented in the matrix; remove the eslint-disable when
+    // filtering is implemented.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     query: TableQuery | undefined,
   ): Promise<TableData> {
     try {
       const sortStr = sortModel.map((s) => `${s.colId} ${s.sort}`).join(", ");
-      const whereClause = query?.filterValue
-        ? this.buildWhereClause(query.filterValue)
-        : "";
       const code =
         `proc sql outobs=${limit};\n` +
         `  select * from ${item.library}.${item.name}` +
-        (whereClause ? ` where ${whereClause}` : "") +
         (sortStr ? ` order by ${sortStr}` : "") +
         `;\nquit;\n`;
 
@@ -269,11 +271,6 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
   // -------------------------------------------------------------------------
   // Helpers
   // -------------------------------------------------------------------------
-
-  private buildWhereClause(filterValue: string): string {
-    const safe = filterValue.replace(/['"]/g, "");
-    return `(1=1 /* filter: ${safe} */)`;
-  }
 
   private parseProcsqlRows(log: string, start: number): TableRow[] {
     const rows: TableRow[] = [];
