@@ -3,13 +3,11 @@
 import { CancellationTokenSource, l10n, window } from "vscode";
 
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
-import { createInterface } from "readline";
 import { resolve } from "path";
+import { createInterface } from "readline";
 
 import { RunResult } from "..";
-import {
-  getSecretStorage,
-} from "../../components/ExtensionContext";
+import { getSecretStorage } from "../../components/ExtensionContext";
 import { updateStatusBarItem } from "../../components/StatusBarItem";
 import { Session } from "../session";
 import { BridgeRequest, BridgeResponse, Config } from "./types";
@@ -118,7 +116,8 @@ export class IomJavaSession extends Session {
 
     if (this._html5FileName) {
       const listOutput = await this.send({ cmd: "flushList" });
-      const listData = typeof listOutput.data === "string" ? listOutput.data : "";
+      const listData =
+        typeof listOutput.data === "string" ? listOutput.data : "";
       if (listData.search('<*id="IDX*.+">') !== -1) {
         runResult.html5 = listData;
         runResult.title = l10n.t("Result");

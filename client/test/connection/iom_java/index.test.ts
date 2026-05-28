@@ -134,7 +134,9 @@ describe("iom-java connection", () => {
       try {
         await setupPromise;
       } catch (err) {
-        caughtError = err as Error;
+        if (err instanceof Error) {
+          caughtError = err;
+        }
       }
 
       expect(caughtError).to.not.be.undefined;

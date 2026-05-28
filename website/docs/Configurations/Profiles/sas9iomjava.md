@@ -33,11 +33,11 @@ If the port is not reachable, contact your SAS administrator to confirm the Work
 
 The extension spawns a small Java process to manage the IOM connection, so a Java executable must be available on the machine where VS Code is running. Java 8 is recommended.
 
-| Java version | Support |
-| ------------ | ------- |
-| Java 8 | Fully supported |
-| Java 9–10 | Supported (`--add-modules java.corba` is added automatically) |
-| Java 11+ | Requires [GlassFish ORB JARs](#java-11-and-later) in `sasJarPath` |
+| Java version | Support                                                           |
+| ------------ | ----------------------------------------------------------------- |
+| Java 8       | Fully supported                                                   |
+| Java 9–10    | Supported (`--add-modules java.corba` is added automatically)     |
+| Java 11+     | Requires [GlassFish ORB JARs](#java-11-and-later) in `sasJarPath` |
 
 You can verify your Java version with:
 
@@ -80,10 +80,10 @@ Java 11 removed the CORBA module that the SAS IOM Java client depends on. To use
 
 The required JARs are published on Maven Central under the group `com.sun.corba.ee`. Download them and place them in your `sasJarPath` directory:
 
-| Maven artifact | Description |
-| -------------- | ----------- |
-| `com.sun.corba.ee:glassfish-corba-orb` | ORB implementation (`ORBImpl`) |
-| `com.sun.corba.ee:glassfish-corba-omgapi` | CORBA API interfaces |
+| Maven artifact                            | Description                    |
+| ----------------------------------------- | ------------------------------ |
+| `com.sun.corba.ee:glassfish-corba-orb`    | ORB implementation (`ORBImpl`) |
+| `com.sun.corba.ee:glassfish-corba-omgapi` | CORBA API interfaces           |
 
 You can download both JARs using Maven:
 
@@ -110,13 +110,13 @@ A SAS 9.4 (remote - IOM Java) connection profile includes the following paramete
 
 `"connectionType": "iom-java"`
 
-| Name         | Description                                 | Additional Notes                                                            |
-| ------------ | ------------------------------------------- | --------------------------------------------------------------------------- |
-| `host`       | IOM Server Host                             | Appears when hovering over the status bar.                                  |
-| `username`   | IOM Server Username                         | The username to establish the IOM connection to the server.                 |
-| `port`       | IOM Server Port                             | The port of the IOM server. The default value is 8591.                      |
-| `sasJarPath` | Path to SAS Integration Technologies JARs  | A fully qualified path to a local directory containing the required JAR files. |
-| `javaPath`   | Path to the Java executable (optional)      | Defaults to `java` resolved from the system PATH.                           |
+| Name         | Description                               | Additional Notes                                                               |
+| ------------ | ----------------------------------------- | ------------------------------------------------------------------------------ |
+| `host`       | IOM Server Host                           | Appears when hovering over the status bar.                                     |
+| `username`   | IOM Server Username                       | The username to establish the IOM connection to the server.                    |
+| `port`       | IOM Server Port                           | The port of the IOM server. The default value is 8591.                         |
+| `sasJarPath` | Path to SAS Integration Technologies JARs | A fully qualified path to a local directory containing the required JAR files. |
+| `javaPath`   | Path to the Java executable (optional)    | Defaults to `java` resolved from the system PATH.                              |
 
 ## Connection Profile Examples
 

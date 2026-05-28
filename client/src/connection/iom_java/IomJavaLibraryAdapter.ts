@@ -36,7 +36,10 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
     await bridgeSend({ cmd: "flushLog" });
   }
 
-  public async getLibraries(): Promise<{ items: LibraryItem[]; count: number }> {
+  public async getLibraries(): Promise<{
+    items: LibraryItem[];
+    count: number;
+  }> {
     try {
       const resp = await bridgeSend({ cmd: "getLibraries" });
       if (resp.status === "error") {
@@ -125,8 +128,7 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
                 format: fmt,
               }),
               label: typeof col.label === "string" ? col.label : undefined,
-              length:
-                typeof col.length === "number" ? col.length : undefined,
+              length: typeof col.length === "number" ? col.length : undefined,
               format: fmt ? { name: fmt } : undefined,
               informat:
                 typeof col.informat === "string" && col.informat
@@ -169,8 +171,7 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
         throw new Error(submitResp.message);
       }
       const logResp = await bridgeSend({ cmd: "flushLog" });
-      const log =
-        typeof logResp.data === "string" ? logResp.data : "";
+      const log = typeof logResp.data === "string" ? logResp.data : "";
       const rows = this.parseProcsqlRows(log, start);
       return { rows, count: -1 };
     } catch (e) {
@@ -186,7 +187,11 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
   ): Promise<TableData> {
     const columns =
       start === 0
-        ? { columns: (await this.getColumns(item)).items.map((c) => c.name || "") }
+        ? {
+            columns: (await this.getColumns(item)).items.map(
+              (c) => c.name || "",
+            ),
+          }
         : {};
     const { rows } = await this.getRows(item, start, limit, [], undefined);
     rows.unshift(columns);
@@ -206,8 +211,7 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
       throw new Error(submitResp.message);
     }
     const logResp = await bridgeSend({ cmd: "flushLog" });
-    const log =
-      typeof logResp.data === "string" ? logResp.data : "";
+    const log = typeof logResp.data === "string" ? logResp.data : "";
     const match = log.match(/IOMJAVA_COUNT=\s*(\d+)/);
     const rowCount = match ? parseInt(match[1], 10) : 0;
     return { rowCount, maxNumberOfRowsToRead: 100 };
@@ -243,9 +247,10 @@ export class IomJavaLibraryAdapter implements LibraryAdapter {
         return base;
       }
       const logResp = await bridgeSend({ cmd: "flushLog" });
-      const log =
-        typeof logResp.data === "string" ? logResp.data : "";
-      const match = log.match(/IOMJAVA_TBLINFO:\s*(\d+)\s+(\d+)\s+(\d+)\s*(.*)/);
+      const log = typeof logResp.data === "string" ? logResp.data : "";
+      const match = log.match(
+        /IOMJAVA_TBLINFO:\s*(\d+)\s+(\d+)\s+(\d+)\s*(.*)/,
+      );
       if (match) {
         return {
           ...base,

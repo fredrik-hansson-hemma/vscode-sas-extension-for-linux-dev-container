@@ -9,9 +9,9 @@ import {
   ViyaProfile,
   toAutoExecLines,
 } from "../components/profile";
+import { getSession as getIomJavaSession } from "./iom_java";
 import { getSession as getITCSession } from "./itc";
 import { ITCProtocol } from "./itc/types";
-import { getSession as getIomJavaSession } from "./iom_java";
 import { Config as RestConfig, getSession as getRestSession } from "./rest";
 import {
   Error2 as ComputeError,

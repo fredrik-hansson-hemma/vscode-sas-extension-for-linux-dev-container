@@ -4,8 +4,8 @@ import { expect } from "chai";
 import sinon from "sinon";
 
 import { LibraryItem } from "../../../src/components/LibraryNavigator/types";
-import * as bridge from "../../../src/connection/iom_java/index";
 import { IomJavaLibraryAdapter } from "../../../src/connection/iom_java/IomJavaLibraryAdapter";
+import * as bridge from "../../../src/connection/iom_java/index";
 
 describe("IomJavaLibraryAdapter", () => {
   let bridgeSendStub: sinon.SinonStub;
@@ -107,8 +107,24 @@ describe("IomJavaLibraryAdapter", () => {
       bridgeSendStub.resolves({
         status: "ok",
         data: [
-          { index: 0, name: "Name", type: "char", length: 8, label: "Student Name", format: "$8.", informat: "" },
-          { index: 1, name: "Age", type: "num", length: 8, label: "Age", format: "", informat: "" },
+          {
+            index: 0,
+            name: "Name",
+            type: "char",
+            length: 8,
+            label: "Student Name",
+            format: "$8.",
+            informat: "",
+          },
+          {
+            index: 1,
+            name: "Age",
+            type: "num",
+            length: 8,
+            label: "Age",
+            format: "",
+            informat: "",
+          },
         ],
       });
 
@@ -140,7 +156,10 @@ describe("IomJavaLibraryAdapter", () => {
         .onFirstCall()
         .resolves({ status: "ok" }) // submit
         .onSecondCall()
-        .resolves({ status: "ok", data: "NOTE: PROC SQL.\nIONJAVA_COUNT=100\n" });
+        .resolves({
+          status: "ok",
+          data: "NOTE: PROC SQL.\nIONJAVA_COUNT=100\n",
+        });
 
       const result = await adapter.getTableRowCount(tableItem);
 

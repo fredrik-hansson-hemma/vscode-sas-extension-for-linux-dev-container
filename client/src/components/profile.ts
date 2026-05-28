@@ -115,7 +115,12 @@ export interface IOMJavaProfile extends BaseProfile {
   javaPath?: string;
 }
 
-export type Profile = ViyaProfile | SSHProfile | COMProfile | IOMProfile | IOMJavaProfile;
+export type Profile =
+  | ViyaProfile
+  | SSHProfile
+  | COMProfile
+  | IOMProfile
+  | IOMJavaProfile;
 
 export enum AutoExecType {
   File = "file",

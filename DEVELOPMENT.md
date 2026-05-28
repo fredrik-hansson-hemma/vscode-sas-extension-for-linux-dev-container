@@ -16,19 +16,19 @@ SAS 9.4 Workspace Server (TCP port 8591)
 
 ## Prerequisites
 
-| Tool | Version | Notes |
-|------|---------|-------|
-| Node.js | LTS | See `.nvmrc` |
-| Java | **8** recommended | Java 9/10 need `--add-modules java.corba`; Java 11+ needs GlassFish ORB JARs in `sasJarPath` |
-| Maven | 3.x | For building the Java bridge |
-| vsce | latest | For packaging the VSIX |
+| Tool    | Version           | Notes                                                                                        |
+| ------- | ----------------- | -------------------------------------------------------------------------------------------- |
+| Node.js | LTS               | See `.nvmrc`                                                                                 |
+| Java    | **8** recommended | Java 9/10 need `--add-modules java.corba`; Java 11+ needs GlassFish ORB JARs in `sasJarPath` |
+| Maven   | 3.x               | For building the Java bridge                                                                 |
+| vsce    | latest            | For packaging the VSIX                                                                       |
 
 ### Using the devcontainer (recommended)
 
 Open the repository in VS Code and select **Reopen in Container**. The
 devcontainer installs Node.js LTS, JDK 11, Maven, and `vsce` automatically.
 
-> **Note on Java runtime**: JDK 11 is used to *compile* the bridge JAR. The
+> **Note on Java runtime**: JDK 11 is used to _compile_ the bridge JAR. The
 > JAR targets Java 8 bytecode (`--release 8`). At runtime you need Java 8 on
 > the machine running VS Code, or Java 9/10 with `--add-modules java.corba`.
 > For Java 11+, place GlassFish ORB JARs
@@ -79,6 +79,7 @@ scp sasserver:/opt/sas/SASVersionedJarRepository/eclipse/plugins/sas.rutil_*.jar
 ```
 
 Minimum required JARs:
+
 - `sas.core.jar`
 - `sas.svc.connection.jar`
 - `sas.entities.jar`
@@ -131,16 +132,16 @@ Then type commands (one JSON object per line) and observe responses:
 
 ## Bridge command reference
 
-| Command | Required fields | Response `data` |
-|---------|----------------|-----------------|
-| `connect` | `host`, `port`, `username`, `password`, `sasJarPath` | — |
-| `submit` | `code` | — |
-| `flushLog` | — | `string` (log text) |
-| `flushList` | — | `string` (list output text) |
-| `getLibraries` | — | `Array<{id, name, readOnly}>` |
-| `getTables` | `libref` | `string[]` (table names) |
-| `getColumns` | `libref`, `table` | `Array<{index, name, type, length, label, format}>` |
-| `disconnect` | — | — |
+| Command        | Required fields                                      | Response `data`                                     |
+| -------------- | ---------------------------------------------------- | --------------------------------------------------- |
+| `connect`      | `host`, `port`, `username`, `password`, `sasJarPath` | —                                                   |
+| `submit`       | `code`                                               | —                                                   |
+| `flushLog`     | —                                                    | `string` (log text)                                 |
+| `flushList`    | —                                                    | `string` (list output text)                         |
+| `getLibraries` | —                                                    | `Array<{id, name, readOnly}>`                       |
+| `getTables`    | `libref`                                             | `string[]` (table names)                            |
+| `getColumns`   | `libref`, `table`                                    | `Array<{index, name, type, length, label, format}>` |
+| `disconnect`   | —                                                    | —                                                   |
 
 Every response is `{"status":"ok",...}` or `{"status":"error","message":"..."}`.
 
