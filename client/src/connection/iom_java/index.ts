@@ -33,7 +33,6 @@ export class IomJavaSession extends Session {
   private _pendingReject: ((e: Error) => void) | undefined;
   private _pendingTimer: NodeJS.Timeout | undefined;
   private _connected = false;
-  private _html5FileName = "";
   private _secretStorage;
   private _passwordKey = "";
   private _passwordCancellation: CancellationTokenSource | undefined;
@@ -113,28 +112,15 @@ export class IomJavaSession extends Session {
   };
 
   protected _run = async (code: string): Promise<RunResult> => {
-    this._html5FileName = "";
-
     await this.send({ cmd: "submit", code });
 
     const log = await this.collectLog();
-    const runResult: RunResult = {};
-
-    if (this._html5FileName) {
-      const listOutput = await this.send({ cmd: "flushList" });
-      const listData =
-        typeof listOutput.data === "string" ? listOutput.data : "";
-      if (listData.search('<*id="IDX*.+">') !== -1) {
-        runResult.html5 = listData;
-        runResult.title = l10n.t("Result");
-      }
-    }
 
     this._onExecutionLogFn?.(
       log.split("\n").map((line) => ({ type: "normal" as const, line })),
     );
 
-    return runResult;
+    return {};
   };
 
   protected _close = async (): Promise<void> => {

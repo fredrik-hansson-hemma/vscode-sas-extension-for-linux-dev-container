@@ -180,14 +180,14 @@ describe("iom-java connection", () => {
       expect(submitMsg.code).to.equal(code);
     });
 
-    it("returns an empty RunResult when there is no HTML output", async () => {
+    it("returns an empty RunResult (ODS HTML5 is not yet streamed back)", async () => {
       const runPromise = session.run("data _null_; run;");
 
       emitBridgeResponse(stdoutEmitter, { status: "ok" });
       emitBridgeResponse(stdoutEmitter, { status: "ok", data: "" });
 
       const result = await runPromise;
-      expect(result.html5).to.be.undefined;
+      expect(result).to.deep.equal({});
     });
   });
 
