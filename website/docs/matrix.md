@@ -11,7 +11,7 @@ sidebar_position: 2
 | [Access SAS Content](./Features/accessContent.md)                                             | :heavy_check_mark: |                     :x:                      |             :x:             |          :x:           |
 | [Access SAS Server](./Features/accessServer.md)                                               | :heavy_check_mark: |              :heavy_check_mark:              |             :x:             |          :x:           | SSH support to be added in a future release                                                                           |
 | [Access connected libraries](./Features/accessLibraries.md)                                   | :heavy_check_mark: |              :heavy_check_mark:              |     :heavy_check_mark:      |          :x:           |
-| [Table viewer](./Features/accessLibraries.md)                                                 | :heavy_check_mark: |              :heavy_check_mark:              |     :heavy_check_mark:      |          :x:           |
+| [Table viewer](./Features/accessLibraries.md)                                                 | :heavy_check_mark: |              :heavy_check_mark:              |             :x:             |          :x:           | iom-java: planned — current `getRows` parses PROC SQL log output and is unreliable.                                   |
 | [SAS Notebooks](./Features/sasNotebook.md)                                                    | :heavy_check_mark: |              :heavy_check_mark:              |     :heavy_check_mark:      |   :heavy_check_mark:   |
 | Convert SAS Notebook to SAS Studio Flow                                                       | :heavy_check_mark: |                     :x:                      |             :x:             |          :x:           |
 | [SAS syntax highlighting in SAS code](./Features/sasCodeEditing.md#sas-syntax-highlighting)   | :heavy_check_mark: |              :heavy_check_mark:              |     :heavy_check_mark:      |   :heavy_check_mark:   |
@@ -21,7 +21,7 @@ sidebar_position: 2
 | [Code completion](./Features/sasCodeEditing.md#code-completion)                               | :heavy_check_mark: |              :heavy_check_mark:              |     :heavy_check_mark:      |   :heavy_check_mark:   |
 | [Pop-up syntax help](./Features/sasCodeEditing.md#pop-up-syntax-help)                         | :heavy_check_mark: |              :heavy_check_mark:              |     :heavy_check_mark:      |   :heavy_check_mark:   |
 | [Snippets](./Features/sasCodeEditing.md#snippets)                                             | :heavy_check_mark: |              :heavy_check_mark:              |     :heavy_check_mark:      |   :heavy_check_mark:   |
-| Able to cancel a running program                                                              | :heavy_check_mark: |              :heavy_check_mark:              |     :heavy_check_mark:      |          :x:           |
+| Able to cancel a running program                                                              | :heavy_check_mark: |              :heavy_check_mark:              |             :x:             |          :x:           | iom-java: planned — needs a `cancel` bridge command wired to `ILanguageService.Cancel`.                               |
 
 # Choose Connection Type
 

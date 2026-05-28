@@ -168,3 +168,12 @@ Every response is `{"status":"ok",...}` or `{"status":"error","message":"..."}`.
   (per-session encrypted store), not in the system keychain.
 - **HTML output**: ODS HTML5 output is not yet streamed back; full log text is
   returned instead. HTML5 result display is a planned follow-up.
+- **Table viewer**: not yet supported. The current `getRows` implementation
+  parses PROC SQL log output and is unreliable, so the capability matrix marks
+  Table viewer as unsupported until a structured `getRows` bridge command
+  (e.g. via `proc json out=...` against a work file) replaces it.
+- **Filter on table viewer**: ignored. The `LibraryAdapter.getRows` interface
+  accepts a `TableQuery`, but iom-java does not translate it to a SAS WHERE
+  clause yet; the filter UI does nothing for iom-java profiles.
+- **Cancel running program**: not yet supported. Needs a `cancel` bridge
+  command wired to `ILanguageService.Cancel`.
