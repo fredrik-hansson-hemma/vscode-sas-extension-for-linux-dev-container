@@ -76,6 +76,14 @@ Confirm that you have specified the protocol correctly. For example, if your SAS
 
 Confirm if SAS Integration Technologies Client is successfully installed. Refer to the [documentation](./Configurations/Profiles/sas9iom.md) for details.
 
+### Why did I get a `java: command not found` or `spawn java ENOENT` error when connecting to SAS 9.4 (remote - IOM Java)?
+
+The extension could not find a Java executable on your PATH. Either install a Java Runtime Environment (JRE) and make sure the `java` command is available in your terminal, or set the `javaPath` property in your connection profile to the full path of your Java executable. Refer to the [documentation](./Configurations/Profiles/sas9iomjava.md) for details.
+
+### Why did I get a `No such file or directory` or class-not-found error when connecting to SAS 9.4 (remote - IOM Java)?
+
+The `sasJarPath` property in your connection profile does not point to a directory containing the required SAS Integration Technologies Java client JAR files. Confirm that the directory exists and contains `sas.core.jar`, `sas.svc.connection.jar`, `sas.entities.jar`, and `sas.rutil.jar`. Refer to the [documentation](./Configurations/Profiles/sas9iomjava.md) for details.
+
 ### I got the `See console log for more details` error. How do I find the console log?​
 
 Click `Help > Toggle Developer Tools` from the top menu bar.

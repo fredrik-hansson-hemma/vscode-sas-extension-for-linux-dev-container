@@ -51,6 +51,17 @@
         "reveal": "never"
       },
       "problemMatcher": ["$ts-webpack-watch", "$tslint-webpack-watch"]
+    },
+    {
+      "label": "Fetch GlassFish ORB",
+      "type": "shell",
+      "command": "./tools/fetch-orb.sh",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always",
+        "clear": true
+      },
+      "problemMatcher": []
     }
   ]
 }

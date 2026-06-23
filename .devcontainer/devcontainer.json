@@ -1,0 +1,30 @@
+{
+  "name": "vscode-sas-extension",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-lts",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "11",
+      "installMaven": "true",
+      "installGradle": "false"
+    }
+  },
+  "postCreateCommand": "npm install && npm install -g @vscode/vsce && mvn -f iom-java-bridge/pom.xml -DskipTests -q package && cp iom-java-bridge/target/iom-java-bridge.jar client/src/connection/iom_java/",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "vscjava.vscode-java-pack"
+      ],
+      "settings": {
+        "java.configuration.runtimes": [
+          {
+            "name": "JavaSE-11",
+            "default": true
+          }
+        ]
+      }
+    }
+  },
+  "remoteUser": "node"
+}
