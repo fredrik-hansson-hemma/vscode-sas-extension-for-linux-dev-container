@@ -9,6 +9,7 @@ import {
   ViyaProfile,
   toAutoExecLines,
 } from "../components/profile";
+import { getSession as getIomJavaSession } from "./iom_java";
 import { getSession as getITCSession } from "./itc";
 import { ITCProtocol } from "./itc/types";
 import { Config as RestConfig, getSession as getRestSession } from "./rest";
@@ -58,6 +59,8 @@ export function getSession(): Session {
       return getITCSession(validProfile.profile, ITCProtocol.COM);
     case ConnectionType.IOM:
       return getITCSession(validProfile.profile, ITCProtocol.IOMBridge);
+    case ConnectionType.IOMJava:
+      return getIomJavaSession(validProfile.profile);
     default:
       throw new Error(
         l10n.t("Invalid connectionType. Check Profile settings."),

@@ -183,7 +183,8 @@
                         "rest",
                         "ssh",
                         "com",
-                        "iom"
+                        "iom",
+                        "iom-java"
                       ]
                     },
                     "sasOptions": {
@@ -448,6 +449,52 @@
                               "USER",
                               "SYSTEM"
                             ]
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "connectionType": {
+                            "const": "iom-java"
+                          }
+                        }
+                      },
+                      "then": {
+                        "required": [
+                          "host",
+                          "username",
+                          "port",
+                          "sasJarPath"
+                        ],
+                        "properties": {
+                          "host": {
+                            "type": "string",
+                            "default": "",
+                            "description": "%configuration.SAS.connectionProfiles.profiles.iomJava.host%"
+                          },
+                          "username": {
+                            "type": "string",
+                            "default": "",
+                            "description": "%configuration.SAS.connectionProfiles.profiles.iomJava.username%"
+                          },
+                          "port": {
+                            "type": "number",
+                            "default": 8591,
+                            "description": "%configuration.SAS.connectionProfiles.profiles.iomJava.port%",
+                            "exclusiveMinimum": 1,
+                            "exclusiveMaximum": 65535
+                          },
+                          "sasJarPath": {
+                            "type": "string",
+                            "default": "",
+                            "description": "%configuration.SAS.connectionProfiles.profiles.iomJava.sasJarPath%"
+                          },
+                          "javaPath": {
+                            "type": "string",
+                            "default": "",
+                            "description": "%configuration.SAS.connectionProfiles.profiles.iomJava.javaPath%"
                           }
                         }
                       }
